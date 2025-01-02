@@ -1,31 +1,35 @@
-import * as MessageRepository from '../repositories/MessageRepository';
 import bcrypt from 'bcrypt';
+import * as UserRepository from '../repositories/UserRepository';
+import { IUser } from '../models/User';
 
-export const getAllMessage = async (name, email, password) => {
-  const existingUser = await MessageRepository.findByEmail(email);
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
+export const hashPassword = async (password: string): Promise<string> => {
+  return bcrypt.hash(password, 10);
+};
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await MessageRepository.create({
-    name,
+export const registerUser = async (
+  username: string,
+  email: string,
+  password: string
+): Promise<IUser> => {
+  const hashedPassword = await hashPassword(password);
+  return UserRepository.createUser({
+    username,
     email,
     password: hashedPassword,
   });
-  return user._id.toString();
 };
 
-export const sendMessage = async (email, password) => {
-  const user = await MessageRepository.findByEmail(email);
-  if (!user) {
-    throw new Error('Invalid credentials');
+export const authenticateUser = async (
+  email: string,
+  password: string
+): Promise<IUser | null> => {
+  const user = await UserRepository.findUserByEmail(email);
+  if (!user || !(await user.comparePassword(password))) {
+    return null;
   }
+  return user;
+};
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new Error('Invalid credentials');
-  }
-
-  return user._id.toString();
+export const getUserById = async (userId: string): Promise<IUser | null> => {
+  return UserRepository.findUserById(userId);
 };
