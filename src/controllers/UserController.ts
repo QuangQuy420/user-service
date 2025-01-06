@@ -2,10 +2,15 @@ import { Request, Response } from 'express';
 import * as UserService from '../services/UserService';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { username, email, password } = req.body;
+  const { email, username, password, passwordConfirm } = req.body;
 
   try {
-    const user = await UserService.registerUser(username, email, password);
+    const user = await UserService.registerUser({
+      email,
+      username,
+      password,
+      passwordConfirm,
+    });
 
     res.status(201).json(user);
   } catch (error: any) {
@@ -13,7 +18,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const signin = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {

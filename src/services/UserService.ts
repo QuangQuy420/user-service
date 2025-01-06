@@ -2,16 +2,36 @@ import bcrypt from 'bcrypt';
 import * as UserRepository from '../repositories/UserRepository';
 import { IUser } from '../models/User';
 
-export const hashPassword = async (password: string): Promise<string> => {
+const hashPassword = async (password: string): Promise<string> => {
   return bcrypt.hash(password, 10);
 };
 
-export const registerUser = async (
-  username: string,
-  email: string,
-  password: string
-): Promise<IUser> => {
+const verifyPassword = async (password: string, passwordConfirm: string) => {
+  if (password !== passwordConfirm) {
+    throw new Error('The password confirm is incorrect!');
+  }
+};
+
+export const registerUser = async ({
+  email,
+  username,
+  password,
+  passwordConfirm,
+}: {
+  email: string;
+  username: string;
+  password: string;
+  passwordConfirm: string;
+}) => {
+  await verifyPassword(password, passwordConfirm);
+
+  const existingUser = await UserRepository.findUserByEmail(email);
+  if (existingUser) {
+    throw new Error('Email is already in use');
+  }
+
   const hashedPassword = await hashPassword(password);
+
   return UserRepository.createUser({
     username,
     email,
