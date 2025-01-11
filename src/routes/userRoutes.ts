@@ -1,13 +1,14 @@
-import express, { Request, Response } from 'express';
-import * as MessageController from '../controllers/MessageController';
+import { Router } from 'express';
+import * as UserController from '../controllers/UserController';
+import { authenticate, authorizeRole } from '../middlewares/authMiddleware';
 
-const router = express.Router();
+const router = Router();
 
-router.post('/message', (req: Request, res: Response) =>
-  MessageController.getAllMessage(req, res)
-);
-router.post('/send-message', (req: Request, res: Response) =>
-  MessageController.sendMessage(req, res)
+router.get(
+  '/me',
+  authenticate,
+  authorizeRole(['user', 'admin']),
+  UserController.getUser
 );
 
 export default router;

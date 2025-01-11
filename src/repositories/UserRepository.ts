@@ -1,9 +1,5 @@
-import Message from '../models/Message';
+import User, { IUser } from '../models/User';
 
-export const getAllMessage = async () => {
-  return 'all message';
-};
-
-export const sendMessage = async () => {
-  return 'send message';
+export const findUserById = async (id: string): Promise<IUser | null> => {
+  return User.findById(id);
 };
